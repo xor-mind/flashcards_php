@@ -1,0 +1,15 @@
+/* Base settings for night mode */
+body {
+    background-color: #121212; /* Dark background */
+    color: #e0e0e0; /* Light text */
+  }
+  
+  a {
+    color: #bb86fc; /* Light purple for links to stand out */
+  }
+  
+  /* Adjusting other elements as needed */
+  h1, h2, h3, h4, h5, h6 {
+    color: #cbcbcb; /* Slightly lighter text for headings */
+  }
+  

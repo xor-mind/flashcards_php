@@ -1,0 +1,74 @@
+/*
+  Flashcards App Core Stylesheet
+
+  This stylesheet provides the *default* styles for the Flashcards web app,
+  intended for desktop or general web environments.
+
+  == Overlay Usage Context ==
+  - Designed for use in an overlay modal (#overlay), which is fixed and centered above the main content.
+  - The flashcard appears as a single large card within the overlay; users interact directly with the card (e.g., flip for Q&A, play flashcard games).
+  - The overlay darkens the background and centers focus on the card, creating a “game mode” or learning environment.
+
+  == Structure & Responsibilities ==
+  - Assumes HTML structure with elements: #overlay, .flashcard, .front, .back.
+  - Enables 3D flip effect via CSS perspective and 3D transforms.
+  - Card faces (.front/.back) use absolute positioning, flexbox for centering, and box-shadow for elevation.
+  - All sizing, color, and animation durations are basic/proof-of-concept.
+
+  == Extensibility ==
+  For platform-specific UIs (e.g., mobile or VR),
+  create specialized stylesheets (e.g., flashcardsMobile.css, flashcardsVR.css)
+  to override these core styles for optimal user experience.
+
+  This separation ensures maintainability as the app grows to support multiple device classes and UI paradigms.
+
+  Author: https://github.com/xor-mind
+  Date: 2025_07_03
+*/
+
+/* 
+  .flashcard: main interactive card, presented inside #overlay. 
+  Fixed size, pointer-enabled, enables 3D flip illusion for study/game mode.
+*/
+.flashcard {
+    width: 300px;
+    height: 200px;
+    perspective: 1000px; /* 3D perspective for flip effect */
+    cursor: pointer;
+    /* Could add margin:auto; or additional centering if not handled by overlay */
+}
+
+.front, .back {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 1.6s;
+    font-size: 20px;
+}
+
+.front {
+    transform: rotateY(0deg);
+    background-color: red;
+}
+
+.back {
+    transform: rotateY(180deg);
+    background-color: green;
+}
+
+#overlay {
+    display: none; /* shown only during flashcard game mode */
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999; /* ensure overlay is on top */
+}

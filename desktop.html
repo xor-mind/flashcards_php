@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<link rel="stylesheet" href="/css/nightmode.css">    
+<link rel="stylesheet" href="/css/style_desktop.css">
+<link rel="stylesheet" href="/css/splitter.css">
+<link rel="stylesheet" href="/css/flashcards.css">
+
+</head>
+<body>
+    <div class="split-view">
+        <div class="pane left-pane">
+            <p>Categories</p>
+            <div id="categories-content">
+                <nav class="navbar">
+                <ul class="tree">
+                    <li>
+                        <a class="selected"  href="#" id="all-categories">All</a>
+                        <ul id="all-categories-list" class="submenu expanded" >
+                            <!-- Dynamically filled categories will go here -->
+                        </ul>
+                    </li>
+                </ul>
+                </nav>
+            </div>                  
+        </div>
+            <div class="splitter"></div>
+        <div class="pane right-pane">
+            <div id="flashcards_list">
+                <!-- Dynamically filled flash cards will go here -->
+            </div>    
+        </div>
+    </div>    
+
+    <!-- Flashcard Overlay -->
+<div id="overlay">
+<div class="flashcard" id="flashcard">
+    <div class="front" id="front">
+        <!-- Content for the front side will be inserted here -->
+    </div>
+    <div class="back" id="back">
+        <!-- Content for the back side will be inserted here -->
+    </div> 
+</div>
+</div>
+</body>
+<script type="module" src="js/splitter.js"></script>
+<script type="module" src="js/desktop.js"></script>
+<script type="module" src="js/flashcards.js"></script>
+<script src="js/responsive-router.js"></script>
+</html>

@@ -1,0 +1,284 @@
+Flashcards App Software Documentation
+
+Version 1.0
+
+Flashcards is an online education application. The Flashcards App solves the problem of flashcard training online for me. 
+
+General Requirements:
+
+- Hosting on my personal website for my lifetime of learning
+- Implement a responsive flashcard app so the UI solution can handle small and large resolution devices(targeting phone or desktop)
+- The code is transparent and I can modify it at will. 
+
+Software Requirements:
+
+FUNCTIONALITY:
+    - Basic flashcard mechanics
+        * Viewing and Selecting categories
+            ** display a list of all flashcard fronts that reference the category.
+        * Viewing and Selecting a single flashcard.
+            ** Display just the front of a card
+            ** let the user flip the card and see the back of the card
+
+UI:
+    - dark mode
+    - mobile UI
+        * Hamburger menu displaying categories with the page showing the flashcard titles.
+    - dekstop UI
+        * Two column page with a splitter, left column displaying categories and the right is flashcards.
+        * desktop UI is trying to be a lot like jMemorize, a java based flashcard app.
+    - both UIs able to display the flashcard as a flipable card that can be clicked/touched.
+    - easily switch between the two UIs as the window is resized
+
+
+DATABASE:
+    - table for categories
+    - table for flashcards
+
+Notes:
+
+In a future version, CRUD operations, a user UI, and a login system will be created.
+A design requirement is to keep it simple and launch sooner.
+
+-------------------------------------------------------------------------
+| Plan to solve |
+| ______________|
+
+A website can solve all these problems. HTML/CSS/javascript can implement the flashcard mechanics:
+JS can restrieve the DATA from the server. JS and HTML can create a VIEW by having js dynamically create a list of flashcards through HTML elements and add closures to these elements for interactivity.. 
+
+The UI can be solved with a combination of HTML/CSS/js, setting background color and styles for nightmode, flexboxes for a splitter, js to control the splitter etc. 
+
+-------------------------------------------------------------------------
+| Language and Tool Solution for requirements 
+
+The front end is vanilla HTML/javascript/css.
+The backend can be node or php. 
+The database will be mysql/maria db.*
+
+* this document will cover only the php part of the backend when appropriate. node will 
+covered in a future update to this document.
+
+-------------------------------------------------------------------------
+
+System Architecture: 
+{
+    Client (Browser)
+        - Loads mobile.html or desktop.html
+        - Fetches flashcards via API
+        - Renders UI dynamically
+        - Handles interactions (flip, category selection)
+
+    Server (PHP)
+        - Provides REST endpoints
+        - Returns JSON flashcard data
+
+    Database (MySQL/MariaDB)
+        - Stores categories
+        - Stores flashcards
+        - allows me development practice with databases
+}
+
+System Architecture - Client:
+{
+    The client consists of html, css and javascript. 
+
+    index.html, desktop.html and mobile.html contain responsive-router.js. This makes it so the site changes UIs based on resolution. index.html will immediately go to desktop.html or mobile.html, and mobile.html and desktop.html can switch between themselves based on a resolution breakpoint, i.e. width < 600px.
+
+    The client then loads flashcard.js which setups the app. Flashcard.js imports dataService.js to fetch and render the categories and flashcards. dataService.js uses apiService.js to get the category and flashcard data, and then dataService.js renders the category and flashcard data to the app's relevant elements.
+}
+
+System Architecture - Server(PHP)
+{
+    Contain's two REST endpoints for apiService.js, get_categories.php and get_flashcards.php. 
+
+    Category API Response Structure (Flashcards App)
+
+    The Flashcards backend exposes a GET /categories endpoint that returns a hierarchical category tree.
+    This structure allows the frontend to render nested categories (e.g., Beginner → Example) without performing additional queries.
+
+    The server uses a single SQL query and a single-pass tree builder to transform flat database rows into a nested JSON structure.
+
+    🧱 Data Model
+    Each category record in the database has:
+    id — unique identifier
+    name — category label
+    parent_id — NULL for top-level categories, otherwise the ID of the parent category
+    This is a classic adjacency list model.
+
+    Returned JSON Structure
+    The API returns an array of top-level categories, each containing a children array.
+
+    Abstract Structure
+    [
+    {
+        "id": "<string>",
+        "name": "<string>",
+        "parent_id": null,
+        "children": [
+        {
+            "id": "<string>",
+            "name": "<string>",
+            "parent_id": "<string>"
+        }
+        ]
+    }
+    ]  
+
+    Key Properties
+    Top-level categories always have parent_id: null.
+    Child categories appear inside the parent’s children array.
+    Children do not contain their own children in the current implementation (two-level hierarchy).
+    The response is always a numerical array, not an associative object.
+
+    an example of what the JSON represents:
+    Beginner
+    ├── Documentation
+    └── Example
+
+    Intermediate
+    ├── Database
+    └── GUI
+
+
+}
+
+flashcard json:
+   
+
+Ensures referential integrity
+dataService.js fetches a list of flashcard from the server via API,  ["id, front, back, category", ...]
+
+View:
+
+the flashcards are rendered to <p>s inside a <div id="flashcards_list">.
+the categories are rendered to <li>s inside a <ul id="all-categories-list">.
+
+Interactivity:
+
+The UI allows clicking/touching.
+
+
+
+
+Loads index.html which redirects to mobile.html or desktop.html.
+Loads flashcards.js 
+
+index.html -> { mobile.html, desktop.html } -> flashcard.js -> dataService.js -> apiService.js -> apiServiceBackends.js  -> Server.
+
+
+Ensures referential integrity
+
+-------------------------------------------------------------------------------------------
+
+Program flow:
+
+Program/source flow
+
+The website starts with index.html which redirects to mobile.html or desktop.html.
+Both mobile/desktop.html use the same App logic(same js) and some of the same elements.
+
+The html will load up flashcard.js which get's the data from the server and render's it to the page's elements.
+
+index.html -> { mobile.html, desktop.html } -> flashcard.js -> dataService.js -> apiService.js -> apiServiceBackends.js  -> Server.
+
+Solutions:
+
+General:
+- Hosting on my personal website for my lifetime of learning
+= godaddy host with php/maria/html/css/js solution
+
+- Implement a responsive flashcard app so UI solution can handle small and large resolution devices(targeting phone or desktop)
+= html and css
+
+- The code is transparent and I can modify it at will. 
+= i'm creating this. 
+
+
+FUNCTIONALITY:
+    - Basic flashcard mechanics
+        * Selecting categories
+        - Selecting a flashcard 
+            * Display the front of a card
+            * let the user flip the card and see the back of the card
+
+Future Versions:
+
+- Add a user system, login page, CRUD operations and a UI for CRUDing.
+this is a decent day's work or more. not a quick fix.
+- Once I get better at javascript, refactor some of the system architecture. I'd like to see a flashcard abstract data type, like a js class, and focus on decoupling how dataService.js works. Right now it's both processing data and rendering. maybe that is how you do it in the webworld, more research is needed.
+
+
+
+Software languages: 
+
+The front end is vanilla HTML/javascript/css.
+The backend can be node or php. 
+The database will be mysql/maria db. 
+
+Website host is currently godaddy that uses php as the backend to interact with the mariadb.
+I run both a local xampp and node version of the site for testing and development.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+here's an example json sent from the server
+{
+    "id": "1",
+    "front": "What is a GUI?",
+    "back": "Graphical User Interface",
+    "category_id": "5"
+}
+
+an example of row in mysql
+id	front	back	category_id	
+1	What is a GUI?	Graphical User Interface	5	
+
+Root:
+
+css
+js  
+php 
+index.html
+desktop.html
+mobile.html
+
+css:
+flashcards.css
+nightmode.css
+splitter.css
+style_desktop.css
+style_mobile.css
+
+js:
+apiService.js
+apiServiceBackends.js
+config.js
+dataService.js
+flashcards.js
+mobile.js
+responsive-router.js
+splitter.js
+uiService.js
+vanilla-ui-loader.js
+
+php:
+db.php 
+fetchtest.php
+get_categories.php
+get_flashcards.php

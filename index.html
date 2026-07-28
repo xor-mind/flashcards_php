@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanilla UI Loader</title>
+  <script>
+    (function() {
+      var isMobile = window.innerWidth <= 600;
+      window.location.replace(isMobile ? '/mobile.html' : '/desktop.html');
+    })();
+  </script>
+</head>
+
+<body>
+  Loading...
+</body>
+
+</html>

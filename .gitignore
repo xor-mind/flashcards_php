@@ -1,0 +1,9 @@
+# IDE junk
+.vscode/
+
+# Sensitive files
+db.php
+.env
+
+#icons not necessary
+favicon.ico

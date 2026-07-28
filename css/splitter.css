@@ -1,0 +1,52 @@
+:root {
+    --left-pane-width: 18%; /* Default width */
+    --right-pane-width: 82%;
+}
+
+
+.split-view {
+    display: flex;
+    width: 100%;
+    height: 100vh; /* Adjust based on your needs */
+}
+
+.pane {
+    flex-grow: 1;
+    width: 50%; /* Initial width */
+    min-width: 0;      /* let the pane actually shrink to the CSS width */
+    overflow: hidden;  /* clip anything that still doesn't fit */
+}
+
+.left-pane {
+    width: var(--left-pane-width);
+}
+
+.right-pane {
+    width: var(--right-pane-width);
+    flex: auto;
+}
+
+
+.splitter {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 1px;
+    border: 1px outset #777777;
+    background: #777777;
+    box-shadow: 0px 0px 10px black;
+    cursor: col-resize; /* Cursor indicates the splitter can be dragged */
+}
+
+.split-view,
+.splitter{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+.left-pane,
+.right-pane {
+    margin: 0;
+    padding: 0px;
+    padding-left: 1em;
+    height: 100%;
+}

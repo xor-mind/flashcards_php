@@ -1,0 +1,114 @@
+:root {
+  --width: 36;
+}
+
+body {
+  height: 100vh;
+}
+
+/* important for margin and style for hte list... why was this in mobile? does it effect the mobile UI? I'll find out tomorrow or soon! */
+.navbar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* this is important for the styling, makes the links looks good. gets rid of underlines and keeps a nice color on black*/
+.navbar li a {
+  display: block;
+  padding: 10px;
+  background-color: transparent;
+  text-decoration: none;
+  color: #ECEFF1;
+}
+
+/* this does effect the list, and makes it apparent what's selected, without, it's hard to know what category i'm in,
+ i think jmemorize underscores or something. */
+.navbar li a.selected {
+  background-color: blue;
+  color: ivory;
+} 
+
+/* ABSOLTE CRUCIAL FOR SOME REASON, the list breaks otherwise */
+.submenu.expanded {
+  display: block;
+}
+
+  .navbar .submenu a {
+    padding-left: 0;
+  }
+
+
+  html {
+    height: 100%;
+    font-weight: 300;
+    font-size: clamp(18px, 100vw / var(--width), 20px);
+    font-feature-settings: "onum", "pnum";
+    line-height: 1.5;
+    -webkit-text-size-adjust: none;
+    -moz-text-size-adjust: none;
+         text-size-adjust: none;
+  }
+  body, html {
+    margin: 0;
+  }
+  .tree {
+    --spacing: 1.5rem;
+    --radius: 10px;
+    padding-left: 1rem;
+  }
+  .tree li a {
+    padding: 0;
+  }
+  .tree li {
+    display: block;
+    position: relative;
+    padding-left: calc(2 * var(--spacing) - var(--radius) - 2px);
+  }
+  .tree ul {
+    margin-left: calc(var(--radius) - var(--spacing));
+    padding-left: 0;
+  }
+  .tree ul li {
+    border-left: 2px solid #aaa;
+  }
+  .tree ul li:last-child {
+    border-color: transparent;
+  }
+  .tree ul li::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: calc(var(--spacing) / -2);
+    left: -2px;
+    width: calc(var(--spacing) - 2px);
+    height: calc(var(--spacing) + 0px);
+    border: solid #aaa;
+    border-width: 0 0 2px 2px;
+  }
+  .tree li::after,
+  .tree .indicator::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: calc(var(--spacing) / 2 - var(--radius));
+    left: calc(var(--spacing) - var(--radius) - 1px);
+    width: calc(2 * var(--radius));
+    height: calc(2 * var(--radius));
+    border-radius: 50%;
+    background: #ddd;
+  }
+  .tree .indicator::before {
+    z-index: 1;
+    background: #696 url("/expand-collapse.svg") 0 0;
+    cursor: pointer;
+  }
+  .tree .indicator.expanded::before {
+    background-position: calc(-2 * var(--radius)) 0;
+  }
+  ul ul {
+    display: none;
+  }
+  ul ul.visible {
+    display: block;
+  }

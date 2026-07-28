@@ -1,0 +1,104 @@
+/*
+Here we're stylizing the general mobile website which in this case hosts
+a flashcard app.
+*/
+body {
+  height: 100vh;
+  background-color: #463043;
+}
+
+#hamburger-icon {
+  cursor: pointer;
+}
+
+/* Navbar: acts as mobile drawer */
+.navbar {
+  width: 250px;
+  position: fixed;
+  left: -250px;
+  top: 0;
+  bottom: 0;
+  backdrop-filter: blur(10px);            /* Frosted glass effect */
+  -webkit-backdrop-filter: blur(10px);    /* Safari support */
+  transition: left 0.3s;
+  z-index: 1000;
+  padding-top: 20px;
+  color: #ECEFF1;
+  border-right: 1px solid rgba(255, 255, 255, 0.1); /* Optional soft edge */
+}
+
+
+.navbar.open {
+  left: 0;
+}
+
+.navbar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar li a {
+  display: block;
+  padding: 10px;
+  background-color: transparent;
+  text-decoration: none;
+  color: #ECEFF1;
+}
+
+.navbar li a.selected {
+  background-color: #43754a;
+  color: white;
+}
+
+.navbar li a.selected {
+  background-color: blue;
+  color: ivory;
+}
+
+.submenu {
+  display: none;
+}
+
+.navbar .submenu a {
+  padding-left: 20px;
+}
+
+ul ul .submenu {
+  background-color: #3B484F; /* Lighter Gun Metal for contrast */
+}
+
+ul ul ul .submenu {
+  background-color: #304634; /* Lighter Gun Metal for contrast */
+}
+
+ul ul ul ul .submenu {
+  background-color: #463043; /* Lighter Gun Metal for contrast */
+}
+
+.submenu.expanded {
+  display: block;
+}
+
+.indicator {
+  font-size: 200%;
+  font-weight: bolder;
+  padding: 5px;
+  margin-right: 0.3rem;
+}
+
+/* Default style for indicators */
+.indicator::before {
+  content: "+"; /* Default content */
+}
+
+/* Style for expanded submenu */
+.indicator.expanded::before {
+  content: "-";
+}
+
+.navbar::after {
+  content: "";
+  display: table;
+  clear: both;
+}/*# sourceMappingURL=style_mobile.css.map */
