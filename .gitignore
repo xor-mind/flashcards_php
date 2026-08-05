@@ -2,7 +2,6 @@
 .vscode/
 
 # Sensitive files
-db.php
 .env
 
 #icons not necessary
