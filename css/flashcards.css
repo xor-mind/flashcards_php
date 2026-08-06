@@ -1,8 +1,5 @@
 /*
-  Flashcards App Core Stylesheet
-
-  This stylesheet provides the *default* styles for the Flashcards web app,
-  intended for desktop or general web environments.
+  this is the style sheet for the flashcard overlay. This is a visual flashcard, meant to be seen by the user, and clicked, which flips it. 
 
   == Overlay Usage Context ==
   - Designed for use in an overlay modal (#overlay), which is fixed and centered above the main content.
@@ -19,11 +16,6 @@
   For platform-specific UIs (e.g., mobile or VR),
   create specialized stylesheets (e.g., flashcardsMobile.css, flashcardsVR.css)
   to override these core styles for optimal user experience.
-
-  This separation ensures maintainability as the app grows to support multiple device classes and UI paradigms.
-
-  Author: https://github.com/xor-mind
-  Date: 2025_07_03
 */
 
 /* 
