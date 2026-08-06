@@ -1,6 +1,6 @@
 css
-js  
-php 
+js
+php
 index.html
 desktop.html
 mobile.html
@@ -24,7 +24,6 @@ splitter.js
 uiService.js
 
 php:
-db.php 
-fetchtest.php
+db.php
 get_categories.php
 get_flashcards.php

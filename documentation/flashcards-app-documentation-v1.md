@@ -80,7 +80,7 @@ The client consists of HTML, CSS, and JavaScript.
 
 CSS is loaded to style the app (see **Directory Hierarchy and Files**, below, for what each stylesheet covers).
 
-The client then loads `flashcard.js`, which sets up the app. `flashcard.js` imports `dataService.js` to fetch and render the categories and flashcards. `dataService.js` uses `apiService.js` to get the category and flashcard data, and then `dataService.js` renders the category and flashcard data to the app's relevant elements.
+The client then loads `flashcards.js`, which sets up the app. `flashcards.js` imports `dataService.js` to fetch and render the categories and flashcards. `dataService.js` uses `apiService.js` to get the category and flashcard data, and then `dataService.js` renders the category and flashcard data to the app's relevant elements.
 
 ### System Architecture - Server (PHP)
 
@@ -213,13 +213,13 @@ Each rendered `<p>` element representing a flashcard stores a closure containing
 
 The website starts with `index.html`, which redirects to `mobile.html` or `desktop.html`. Both mobile/desktop.html use the same app logic (same JS) and some of the same elements.
 
-The HTML will load up `flashcard.js`, which gets the data from the server and renders it to the page's elements.
+The HTML will load up `flashcards.js`, which gets the data from the server and renders it to the page's elements.
 
 ```
-index.html -> { mobile.html, desktop.html } -> flashcard.js -> dataService.js -> apiService.js -> apiServiceBackends.js -> Server
+index.html -> { mobile.html, desktop.html } -> flashcards.js -> dataService.js -> apiService.js -> apiServiceBackends.js -> Server
 ```
 
-`flashcard.js` initiates the app by calling `dataService.js`'s `fetchAndRenderCategories()` and `fetchAndRenderFlashcards()`.
+`flashcards.js` initiates the app by calling `dataService.js`'s `fetchAndRenderCategories()` and `fetchAndRenderFlashcards()`.
 
 `dataService.js` first calls `apiService.js`'s `fetchCategories()` and `fetchFlashcards()`, which get the JSON data from the server. `dataService.js` will then render that data to the DOM:
 
@@ -228,7 +228,7 @@ index.html -> { mobile.html, desktop.html } -> flashcard.js -> dataService.js ->
 
 `apiService.js` figures out which backend is being used through `config.js`, and then calls the right signature from `apiServiceBackends.js`, which is a file that does the actual connection to the server.
 
-`flashcard.js` does some further UI setup, which will be decoupled in future versions.
+`flashcards.js` does some further UI setup, which will be decoupled in future versions.
 
 ### Back End
 
@@ -262,7 +262,7 @@ apiService.js          - connects to the correct backend and returns it
 apiServiceBackends.js  - provides all backend connections for all servers
 config.js              - configures which backend to use
 dataService.js         - gets flashcard and category data and renders it to the DOM
-flashcard.js           - sets up the app and adds some UI behavior
+flashcards.js          - sets up the app and adds some UI behavior
 mobile.js              - adds UI functionality to the hamburger menu
 responsive-router.js   - switches to the correct UI based on resolution
 splitter.js            - adds UI splitter functionality
