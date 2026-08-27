@@ -6,7 +6,8 @@
     <title>Vanilla UI Loader</title>
   <script>
     (function() {
-      var isMobile = window.innerWidth <= 600;
+      // Same measurement responsive-router.js uses, so the two can never disagree.
+      var isMobile = window.matchMedia('(max-width: 600px)').matches;
       window.location.replace(isMobile ? '/mobile.html' : '/desktop.html');
     })();
   </script>

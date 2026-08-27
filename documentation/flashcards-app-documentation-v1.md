@@ -86,7 +86,7 @@ The redirect is the intentional, simpler design that I landed on. I get to code 
 
 The App will first redirect a user to either mobile.html or desktop.html.
 
-`index.html`, `desktop.html`, and `mobile.html` contain `responsive-router.js`. This makes it so the site changes UIs based on resolution. `index.html` will immediately go to `desktop.html` or `mobile.html`, and `mobile.html` and `desktop.html` can switch between themselves based on a resolution breakpoint, i.e. width < 600px.
+`desktop.html` and `mobile.html` contain `responsive-router.js`, which makes the site change UIs based on resolution. 
 
 CSS is loaded to style the app (see **Directory Hierarchy and Files**, below, for what each stylesheet covers).
 
