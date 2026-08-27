@@ -19,6 +19,7 @@ config.js
 dataService.js
 flashcards.js
 mobile.js
+renderService.js
 responsive-router.js
 splitter.js
 uiService.js

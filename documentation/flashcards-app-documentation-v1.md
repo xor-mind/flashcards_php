@@ -28,7 +28,7 @@ Flashcards is an online education application. The Flashcards App solves the pro
     - Hamburger menu displaying categories, with the page showing the flashcard titles
 - Desktop UI
     - Two column page with a splitter: left column displaying categories, right column displaying flashcards
-    - Desktop UI is trying to be a lot like jMemorize, a Java-based flashcard app
+    - Desktop UI is trying to be a lot like [jMemorize](https://sourceforge.net/projects/jmemorize/), a Java-based flashcard app
 - Both UIs able to display the flashcard as a flippable card that can be clicked/touched
 - Easily switch between the two UIs as the window is resized
 
@@ -36,6 +36,10 @@ Flashcards is an online education application. The Flashcards App solves the pro
 
 - Table for categories
 - Table for flashcards
+
+### Design
+- Software documentation: what is it, how does it work.
+- currenlty no need for code documentation as this version is very barebones and contains no complex abstractions or systems.
 
 ### Notes
 
@@ -54,54 +58,61 @@ The database will be MySQL/MariaDB.\*
 
 \* This document will cover only the PHP part of the backend when appropriate. Node will be covered in a future update to this document.
 
-## System Architecture
+## High-Level View of the Flashcard App
 
-```
-Client (Browser)
-    - Loads mobile.html or desktop.html, and relevant JavaScript
-    - Fetches flashcards from server via API
-    - Renders UI dynamically
-    - Handles interactions (flip, category selection)
+The application consists of two single-page applications — a desktop variant and a mobile variant — that hand off automatically at a 600px breakpoint*. Each variant is a self-contained HTML/JS/PHP SPA; no further page reloads occur within a session once a variant has loaded. Both variants share the same app logic(flashcard data -> dom) with only UI related differences.
 
-Server (PHP)
-    - Provides REST endpoints
-    - Returns JSON flashcard data
+* i chose this value arbitrarily, and I may change after I test the app
 
-Database (MySQL/MariaDB)
-    - Stores categories
-    - Stores flashcards
-```
+### Design Choice
+
+I chose a two-SPA solution because I first tried a responsive CSS architecture using media queries, structuring the DOM so a single UI could represent a flashcard app regardless of resolution.
+
+My desktop and mobile UIs turned out to be too different for that to work well, though. The desktop UI looks like two panes with a splitter. The mobile UI looks like a single page with a slide-over panel linked to a hamburger menu.
+
+Responsive CSS, within my ability, required strong coupling between the mobile and desktop DOM to represent both sets of UI functionality. Desktop UI code had to include hamburger-menu DOM it never used, and mobile UI code had to include splitter DOM it never used. That made testing difficult — the code structure was messy and entangled.
+
+I also don't know how to properly hide/unhide DOM elements at a breakpoint without breaking separation of concerns. Desktop CSS ended up aware of some mobile UI elements, and mobile CSS aware of some desktop UI elements.
+
+I decided the two UIs were different enough that I wanted to treat the mobile and desktop code separately, which would make testing and development easier.
+
+From there, I tried building my own JavaScript bootloader to inject the mobile and desktop code into the homepage (`index.html`), so I could have a real SPA. It seemed like a fun and cool idea — fetch `mobile.html`/`desktop.html` and hot-swap their JS/CSS into the live document at runtime, all to avoid the redirect. I abandoned this due to script re-execution and cleanup issues.
+
+The redirect is the intentional, simpler design that I landed on. I get to code two separate webpages — one mobile, one desktop — with no confusion between them. Both variants share the same core logic module (`flashcards.js`), so nothing here is copy-pasta — it's just the UI DOM and some mobile- or desktop-specific JavaScript that differ, and that's perfect.
+
+
 
 ### System Architecture - Client
 
-The client consists of HTML, CSS, and JavaScript.
+The App will first redirect a user to either mobile.html or desktop.html.
 
 `index.html`, `desktop.html`, and `mobile.html` contain `responsive-router.js`. This makes it so the site changes UIs based on resolution. `index.html` will immediately go to `desktop.html` or `mobile.html`, and `mobile.html` and `desktop.html` can switch between themselves based on a resolution breakpoint, i.e. width < 600px.
 
 CSS is loaded to style the app (see **Directory Hierarchy and Files**, below, for what each stylesheet covers).
 
-The client then loads `flashcards.js`, which sets up the app. `flashcards.js` imports `dataService.js` to fetch and render the categories and flashcards. `dataService.js` uses `apiService.js` to get the category and flashcard data, and then `dataService.js` renders the category and flashcard data to the app's relevant elements.
+The app then loads `flashcards.js`, which is the main and only file that wires the rest of the app together. The app is split into single-responsibility layers:
+
+- **Data layer** — `dataService.js` fetches category and flashcard data (via `apiService.js`) and returns it as plain data — parsed JS objects/arrays, never DOM elements. Right now it's a thin pass-through. The view layer could fetch straight from `apiService.js` instead, but this layer exists so the rest of the app imports "the data source," not `apiService.js` specifically — if shaping or caching is ever needed, it goes here without any caller changing its imports. 
+- **View layer** — `renderService.js` turns already-fetched data into DOM elements. It doesn't fetch data or decide what a click does; callers pass a callback that it invokes with the clicked category id / flashcard.
+- **Overlay layer** — `uiService.js` is the only file that touches the single-flashcard overlay (`#overlay`, `#flashcard`, `#front`, `#back`) and owns the flip-rotation state.
+
+`flashcards.js` fetches data through `dataService.js`, hands it to `renderService.js` to build the DOM, and passes `uiService.js`'s `openCard` as the click callback so a rendered flashcard opens in the overlay.
 
 ### System Architecture - Server (PHP)
 
-The server exposes two REST endpoints consumed by `apiService.js`: `get_categories.php` and `get_flashcards.php`.
+documentation/flashcards.sql contain's Database Schema & Sample Data.
+
+PHP scripts returning flashcard and category JSON are consumed by `apiService.js`: `get_categories.php` and `get_flashcards.php`.
+
+#
 
 **`get_categories.php` — Category API Response Structure**
 
-Endpoint: `GET /php/get_categories.php`
 
 Returns a hierarchical category tree. This allows the frontend to render nested categories (e.g., Beginner → Example) without performing additional queries.
 
 The server uses a single SQL query and a single-pass tree builder to transform flat database rows into a nested JSON structure.
 
-**Data Model**
-
-Each category record in the database has:
-- `id` — unique identifier
-- `name` — category label
-- `parent_id` — NULL for top-level categories; otherwise the ID of the parent category
-
-This is a classic adjacency list model.
 
 **Returned JSON Structure**
 
@@ -136,27 +147,102 @@ Intermediate
 └── GUI
 ```
 
+#
+
 **`get_flashcards.php` — Flashcards API Response Structure**
 
-Endpoint: `GET /php/get_flashcards.php?category_id={id}`
 
 Returns flashcards, optionally filtered by category.
 
-**Query Parameters**
-- `category_id` (optional) — returns flashcards belonging to the specified category and all of its descendants
+Where `get_categories.php` returns a tree, this endpoint returns a flat list. The hierarchy lives entirely on the category side; a flashcard only carries a `category_id` pointing at wherever it sits in that tree. The response shape therefore never changes — filtering changes which rows come back, not how they are nested.
 
-**Response Format**
+`GET /php/get_flashcards.php?category_id={id}`
 
-An array of flashcard objects, each with:
-- `id`
-- `front`
-- `back`
-- `category_id`
+`category_id` is optional and must be numeric — the endpoint tests `isset()` and `is_numeric()` together. If either test fails, filtering is skipped entirely and every flashcard in the table is returned. There is no error response for a bad `category_id`; the request quietly degrades to "give me everything."
 
-**Notes**
-- Filtering is hierarchy-aware, using BFS traversal to collect all descendant categories.
-- The API always returns a flat list of flashcards.
-- Supports multi-level category trees without additional queries.
+
+**Filtering Is Subtree-Wide**
+
+Passing a `category_id` does not return only that category's cards. It returns that category's cards *and* the cards of every category nested beneath it, at any depth.
+
+`getAllDescendantIds()` performs a breadth-first walk of the category tree. It seeds a queue with the requested id, then repeatedly pops an id, records it, and queries `categories` for rows whose `parent_id` matches that id, pushing those children onto the queue. The walk ends when the queue empties, and it returns every id it visited — the requested category included.
+
+Requesting `Beginner` therefore covers its whole subtree:
+
+```
+Beginner            <- requested
+├── Documentation   <- included
+└── Example         <- included
+
+Intermediate        <- not included
+├── Database
+└── GUI
+```
+
+The collected ids then become a single prepared statement, one placeholder per id, all bound as integers:
+
+```sql
+SELECT * FROM flashcards WHERE category_id IN (?, ?, ?)
+```
+
+One request, one subtree, one flashcard query. This is the same intent as `get_categories.php`: hand the frontend everything it needs in a single round trip rather than making it walk the tree itself with follow-up calls.
+
+Worth noting the cost, since it is invisible from the client side: the walk itself issues one query per category it visits. At the current tree size that is irrelevant, but it is a recursive-query-shaped problem being solved with a loop, and it is the first thing I would revisit if the category tree ever gets deep.
+
+
+**Returned JSON Structure**
+
+The API returns a flat array of flashcard objects — no `children`, no nesting. Values arrive as strings, because `mysqli`'s `fetch_assoc()` returns every column as a string regardless of its SQL type, so `id` is `"3"` rather than `3`.
+
+Abstract structure:
+```json
+[
+  {
+    "id": "<string>",
+    "front": "<string>",
+    "back": "<string>",
+    "category_id": "<string>"
+  }
+]
+```
+
+Example representation, using the sample data in `documentation/flashcards.sql`. Category `1` is `Beginner`, with `Example` (`3`) and `Documentation` (`4`) nested beneath it. `Beginner` holds no cards of its own, so every card below comes from its children — which is exactly the behavior the subtree walk exists to provide:
+
+`GET /php/get_flashcards.php?category_id=1`
+
+```json
+[
+  {
+    "id": "3",
+    "front": "Give an example of a loop structure in programming.",
+    "back": "For loop, while loop, do-while loop.",
+    "category_id": "3"
+  },
+  {
+    "id": "4",
+    "front": "What is recursion in computer science?",
+    "back": "A method of solving a problem where the solution depends on solutions to smaller instances of the same problem.",
+    "category_id": "3"
+  },
+  {
+    "id": "5",
+    "front": "Why is documentation important in programming?",
+    "back": "It helps others understand the codebase, making maintenance and updates easier.",
+    "category_id": "4"
+  },
+  {
+    "id": "6",
+    "front": "What should good documentation include?",
+    "back": "Purpose of the code, how to install and use it, and examples of key functions.",
+    "category_id": "4"
+  }
+]
+```
+
+A request with no `category_id` skips the walk entirely and runs `SELECT * FROM flashcards`, returning every card in the table in the same flat shape.
+
+When a category and its whole subtree contain no cards, the response is an empty array, `[]`, not an error. The frontend renders an empty list and nothing needs to special-case it.
+
 
 ## HTML Visual Structure
 
@@ -168,15 +254,15 @@ Both `mobile.html` and `desktop.html` share several key DOM elements used by the
 <ul id="all-categories-list"></ul>
 ```
 
-This element is where the application dynamically renders the list of flashcard categories. `dataService.js` retrieves this element via:
+This element is where the application dynamically renders the list of flashcard categories. `flashcards.js` retrieves this element via:
 
 ```js
-const allCategoriesList = document.getElementById('all-categories-list');
+const categoriesListEl = document.getElementById('all-categories-list');
 ```
 
-and populates it when categories are loaded.
+and passes it to `renderService.js`'s `renderCategories()` when categories are loaded.
 
-> **Open question:** `get_categories.php` returns a nested category tree, but this container is a single flat `<ul>`. This doc doesn't yet say whether the renderer should flatten the tree with indentation, build nested `<ul>`s per level, or keep the sidebar flat and rely on the hierarchy-aware filtering in `get_flashcards.php` alone. Worth deciding before writing `dataService.js`'s category-rendering logic.
+`renderService.js` renders the nested tree returned by `get_categories.php` as nested `<ul>`s: each category with children gets a `<ul class="submenu">` appended to its `<li>`, and categories with children are marked with a `<span class="indicator">` (the expand/collapse `+`). The collapse/expand behavior and the "selected" highlight are handled by the `navbar` click/dblclick listeners in `flashcards.js`.
 
 **2. Flashcard List Container**
 
@@ -184,7 +270,7 @@ and populates it when categories are loaded.
 <div id="flashcards_list"></div>
 ```
 
-This element is used by `dataService.js` to render the list of flashcards belonging to the selected category.
+This element is used by `renderService.js` to render the list of flashcards belonging to the selected category.
 
 **3. Flashcard Overlay Structure**
 
@@ -199,40 +285,21 @@ Both HTML files include the overlay used to display a single flashcard:
 </div>
 ```
 
-When a user selects a flashcard, this overlay is populated with the flashcard's data. This occurs through the click-handler closure created during rendering:
+When a user selects a flashcard, this overlay is populated with the flashcard's data. `renderService.js` gives each rendered `<p>` a click-handler closure that calls back into whatever the controller passed in:
 
 ```js
-p.onclick = () => showFlashcardOverlay(flashcard);
+p.onclick = () => onCardClick(flashcard);
 ```
 
-Each rendered `<p>` element representing a flashcard stores a closure containing its flashcard data, enabling the overlay to display the correct content when clicked.
+`flashcards.js` passes `uiService.js`'s `openCard` as `onCardClick`, so clicking a flashcard calls `openCard(flashcard)`, which resets the flip state, fills `#front`/`#back`, and shows the overlay. Each `<p>` stores a closure containing its own flashcard data, so the overlay displays the correct content when clicked.
 
-## Program Flow
+#
 
-### Front End
+Mobile.html and Desktop.html also have key differences. Mobile.html has a hamburger menu and desktop.html has splitter panes. 
+This is the payoff for choosing a 2 page SPA design. The UI's are properly decoupled, are easy to test, and fulfil the software's needs. 
 
-The website starts with `index.html`, which redirects to `mobile.html` or `desktop.html`. Both mobile/desktop.html use the same app logic (same JS) and some of the same elements.
 
-The HTML will load up `flashcards.js`, which gets the data from the server and renders it to the page's elements.
 
-```
-index.html -> { mobile.html, desktop.html } -> flashcards.js -> dataService.js -> apiService.js -> apiServiceBackends.js -> Server
-```
-
-`flashcards.js` initiates the app by calling `dataService.js`'s `fetchAndRenderCategories()` and `fetchAndRenderFlashcards()`.
-
-`dataService.js` first calls `apiService.js`'s `fetchCategories()` and `fetchFlashcards()`, which get the JSON data from the server. `dataService.js` will then render that data to the DOM:
-
-- The flashcards are rendered to `<p>`s inside a `<div id="flashcards_list">`.
-- The categories are rendered to `<li>`s inside a `<ul id="all-categories-list">`.
-
-`apiService.js` figures out which backend is being used through `config.js`, and then calls the right signature from `apiServiceBackends.js`, which is a file that does the actual connection to the server.
-
-`flashcards.js` does some further UI setup, which will be decoupled in future versions.
-
-### Back End
-
-`get_categories.php` and `get_flashcards.php` just wait to be called and return the relevant data. They both reference `db.php`, which provides credentials and identifiers for the database.
 
 ## Directory Hierarchy and Files
 
@@ -261,12 +328,13 @@ style_mobile.css   - mobile site general colors and style
 apiService.js          - connects to the correct backend and returns it
 apiServiceBackends.js  - provides all backend connections for all servers
 config.js              - configures which backend to use
-dataService.js         - gets flashcard and category data and renders it to the DOM
-flashcards.js          - sets up the app and adds some UI behavior
+dataService.js         - data layer: fetches flashcard and category data (no DOM)
+renderService.js       - view layer: turns fetched data into DOM elements
+flashcards.js          - controller: wires data/view/overlay layers and category-tree UI
 mobile.js              - adds UI functionality to the hamburger menu
 responsive-router.js   - switches to the correct UI based on resolution
 splitter.js            - adds UI splitter functionality
-uiService.js           - currently provides UI functionality for overlay
+uiService.js           - overlay layer: owns the flashcard overlay and flip state
 ```
 
 **php:**
